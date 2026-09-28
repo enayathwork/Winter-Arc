@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Winter Arc</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C1620; --bg2:#13202D; --card:#17242F;
+  --ink:#EDF1F4; --ink-dim:#8FA2AF;
+  --gold:#C9A876; --frost:#7DA9C4; --line:#243544; --bad:#D98A7A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#F4F3EF; --bg2:#ECEAE3; --card:#FFFFFF;
+    --ink:#1B2530; --ink-dim:#66727C;
+    --gold:#9A6F2E; --frost:#3E6E8E; --line:#DEDCD3; --bad:#B4533F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1620; --bg2:#13202D; --card:#17242F; --ink:#EDF1F4; --ink-dim:#8FA2AF;
+  --gold:#C9A876; --frost:#7DA9C4; --line:#243544; --bad:#D98A7A;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;}
+body{background:var(--bg); color:var(--ink); font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:680px;margin:0 auto;padding:28px 18px 100px;}
+header h1{font-family:'Fraunces',serif; font-weight:700; font-size:32px; letter-spacing:-0.02em; margin:0 0 4px;}
+header .sub{color:var(--ink-dim); font-size:14px; margin:0 0 22px;}
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:24px;}
+.stat{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 10px; text-align:center;}
+.stat .num{font-family:'Fraunces',serif; font-size:24px; color:var(--gold); display:block;}
+.stat .lbl{color:var(--ink-dim); font-size:11px; margin-top:2px; display:block;}
+nav.tabs{display:flex; gap:4px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:4px; margin-bottom:22px; overflow-x:auto;}
+nav.tabs button{flex:1; background:none; border:none; color:var(--ink-dim); font-family:inherit; font-size:12.5px; font-weight:500; padding:9px 8px; border-radius:7px; cursor:pointer; white-space:nowrap;}
+nav.tabs button.active{background:var(--frost); color:var(--bg); font-weight:600;}
+.view{display:none;}
+.view.active{display:block;}
+h2{font-family:'Fraunces',serif; font-weight:600; font-size:18px; margin:0 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line);}
+h3{font-size:13px; font-weight:600; color:var(--gold); margin:26px 0 8px; text-transform:uppercase; letter-spacing:.06em;}
+.item{padding:12px 0; border-bottom:1px solid var(--line);}
+.irow{display:flex; gap:12px; align-items:center;}
+textarea.hn{min-height:58px; margin-top:10px; font-size:13px;}
+.logrow .ln{display:block; color:var(--ink-dim); font-size:12px; margin-top:3px; white-space:pre-wrap;}
+.item .name{flex:1; font-size:14.5px;}
+.item .name.anchor{color:var(--gold); font-weight:600;}
+.item .time{display:block; color:var(--gold); font-size:12px; margin-top:2px; font-weight:500;}
+.tbtn{flex:0 0 auto; width:30px; height:30px; border-radius:8px; border:1px solid var(--line); background:var(--bg2); color:transparent; cursor:pointer; font-size:15px;}
+.tbtn.on{background:var(--frost); border-color:var(--frost); color:var(--bg);}
+.rhythm{font-size:13px; color:var(--ink-dim); line-height:1.7;}
+.rhythm b{color:var(--gold); font-weight:600;}
+textarea,input[type=text],input[type=url],input[type=date]{
+  width:100%; background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:8px;
+  padding:10px 12px; font-family:inherit; font-size:14px;
+}
+textarea{min-height:96px; resize:vertical; line-height:1.5;}
+label.f{display:block; font-size:12px; color:var(--ink-dim); margin:14px 0 6px;}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.hint{font-size:12px; color:var(--ink-dim); line-height:1.55; margin-top:8px;}
+.status{font-size:12.5px; margin-top:10px; min-height:18px; color:var(--ink-dim);}
+.status.ok{color:var(--frost);} .status.err{color:var(--bad);}
+.btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+button.b{background:none; border:1px solid var(--line); color:var(--ink); padding:10px 14px; border-radius:8px; font-size:13px; cursor:pointer; font-family:inherit;}
+button.b.primary{background:var(--frost); border-color:var(--frost); color:var(--bg); font-weight:600;}
+button.b.gold{color:var(--gold); border-color:var(--gold);}
+button.b.danger{color:var(--bad); border-color:var(--bad);}
+button.b:disabled{opacity:.4; cursor:default;}
+.grid{display:grid; grid-template-columns:minmax(78px,1.6fr) repeat(7,minmax(24px,1fr)); gap:4px; align-items:center;}
+.grid .rowlabel{font-size:11.5px; padding:7px 2px 7px 0; line-height:1.25;}
+.grid .daylabel{color:var(--ink-dim); text-align:center; font-size:10px;}
+.chk{aspect-ratio:1; border-radius:7px; border:1px solid var(--line); background:var(--card); cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; color:transparent; font-size:12px;}
+.chk.on{background:var(--frost); border-color:var(--frost); color:var(--bg);}
+.chk.today{border-color:var(--gold);}
+.logrow{display:flex; justify-content:space-between; gap:8px; font-size:13px; padding:9px 0; border-bottom:1px solid var(--line);}
+.logrow .ld{color:var(--ink-dim); font-size:11.5px;}
+.logrow .lt{color:var(--gold); font-weight:500;}
+.notecard{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:13px; line-height:1.5; white-space:pre-wrap;}
+.notecard .nd{display:block; color:var(--ink-dim); font-size:11px; margin-bottom:4px;}
+.empty{color:var(--ink-dim); font-size:13px; padding:14px 0;}
+.monthpick{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+.monthpick button{background:var(--card); border:1px solid var(--line); color:var(--ink); width:32px; height:32px; border-radius:8px; font-size:15px; cursor:pointer;}
+.monthpick .mlabel{font-family:'Fraunces',serif; font-size:16px;}
+.barlist{display:flex; flex-direction:column; gap:14px; margin-bottom:8px;}
+.barrow .top{display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;}
+.barrow .pct{color:var(--ink-dim);}
+.bartrack{height:8px; background:var(--card); border:1px solid var(--line); border-radius:5px; overflow:hidden;}
+.barfill{height:100%; background:var(--frost); border-radius:5px;}
+.help{display:none; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-top:12px; font-size:13px; line-height:1.6;}
+.help.open{display:block;}
+.help ol{margin:0 0 10px; padding-left:20px;}
+.help li{margin-bottom:6px;}
+.help pre{background:var(--bg2); border:1px solid var(--line); border-radius:8px; padding:10px; font-size:11px; line-height:1.45; overflow-x:auto; white-space:pre; margin:8px 0; color:var(--ink);}
+.help .warn{color:var(--ink-dim); font-size:12px;}
+#onboard{display:none; position:fixed; inset:0; z-index:100; background:var(--bg); overflow-y:auto; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+#onboard.show{display:block;}
+#onboard .box{max-width:480px; margin:0 auto; padding:40px 20px 60px;}
+#onboard h1{font-family:'Fraunces',serif; font-size:30px; margin:0 0 6px; letter-spacing:-0.02em;}
+#onboard p{color:var(--ink-dim); font-size:14px; margin:0 0 8px; line-height:1.5;}
+#onboard .b{width:100%; margin-top:20px; padding:13px;}
+#toast{position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translate(-50%,24px); z-index:200; max-width:92%; min-width:220px; background:var(--card); color:var(--ink); border:1px solid var(--line); border-left:4px solid var(--frost); border-radius:10px; padding:12px 16px; font-size:13.5px; line-height:1.4; box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:opacity .22s, transform .22s;}
+#toast.show{opacity:1; transform:translate(-50%,0); pointer-events:auto; cursor:pointer;}
+#toast.err{border-left-color:var(--bad);}
+#toast.gold{border-left-color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Winter Arc</h1>
+    <p class="sub" id="subline"></p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><span class="num" id="stStreak">0</span><span class="lbl">prayer streak</span></div>
+    <div class="stat"><span class="num" id="stWeekPct">0%</span><span class="lbl">this week</span></div>
+    <div class="stat"><span class="num" id="stDay">–</span><span class="lbl" id="stDayLbl">challenge day</span></div>
+  </div>
+
+  <nav class="tabs">
+    <button data-view="today" class="active">Today</button>
+    <button data-view="tracker">Tracker</button>
+    <button data-view="log">Log</button>
+    <button data-view="report">Monthly</button>
+    <button data-view="settings">Settings</button>
+  </nav>
+
+  <section class="view active" id="view-today">
+    <h2 id="todayHeading">Today</h2>
+    <div id="todayItems"></div>
+    <h3>Daily note</h3>
+    <textarea id="noteBox" placeholder="How did today go? Wins, misses, what to fix tomorrow…"></textarea>
+    <div class="status" id="noteStatus"></div>
+    <h3>Rhythm</h3>
+    <div class="rhythm">
+      <b>Fajr</b> pray → gym or hardest focus block<br>
+      <b>Dhuhr</b> pray → 2-minute check-in<br>
+      <b>Asr</b> pray → 1 hour skill / business / content<br>
+      <b>Maghrib</b> pray → clean meal, family, rest<br>
+      <b>Isha</b> pray → plan tomorrow, phone away, sleep
+    </div>
+  </section>
+
+  <section class="view" id="view-tracker">
+    <h2>This week</h2>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="view" id="view-log">
+    <h2>Recent check-ins</h2>
+    <div id="loglist"></div>
+    <h3>Daily notes</h3>
+    <div id="notelist"></div>
+  </section>
+
+  <section class="view" id="view-report">
+    <h2>Monthly report</h2>
+    <div class="monthpick">
+      <button id="prevMonth">‹</button><span class="mlabel" id="monthLabel"></span><button id="nextMonth">›</button>
+    </div>
+    <div class="barlist" id="reportBars"></div>
+    <div class="btns"><button class="b gold" id="exportBtn">Export month as .csv</button></div>
+  </section>
+
+  <section class="view" id="view-settings">
+    <h2>Settings &amp; sync</h2>
+    <h3 style="margin-top:0">Your profile</h3>
+    <label class="f" for="pName">Name</label>
+    <input type="text" id="pName" placeholder="Your name" autocomplete="name">
+    <div class="row2">
+      <div><label class="f" for="pAge">Age</label><input type="text" inputmode="numeric" id="pAge" placeholder="e.g. 24"></div>
+      <div><label class="f" for="pCity">City</label><input type="text" id="pCity" placeholder="e.g. Hyderabad"></div>
+    </div>
+    <div class="row2">
+      <div><label class="f" for="pHeight">Height (cm)</label><input type="text" inputmode="decimal" id="pHeight" placeholder="e.g. 172"></div>
+      <div><label class="f" for="pWeight">Starting weight (kg)</label><input type="text" inputmode="decimal" id="pWeight" placeholder="e.g. 78"></div>
+    </div>
+    <label class="f" for="pGoal">My main goal this winter</label>
+    <textarea id="pGoal" style="min-height:70px" placeholder="Why are you doing this arc?"></textarea>
+    <div class="btns"><button class="b primary" id="saveProfile">Save profile</button></div>
+    <div class="status" id="profileStatus"></div>
+
+    <h3>Sync</h3>
+    <label class="f" for="endpoint">Optional Google Apps Script POST endpoint</label>
+    <input type="url" id="endpoint" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+    <div class="btns">
+      <button class="b primary" id="saveSettings">Save settings</button>
+      <button class="b" id="testSync">Test sync</button>
+    </div>
+    <div class="status" id="syncStatus"></div>
+    <div class="btns"><button class="b gold" id="helpBtn">How to add Google Sheets</button></div>
+    <div class="help" id="helpBox">
+      <ol>
+        <li>Create a blank sheet at sheets.google.com and name it "Winter Arc".</li>
+        <li>Go to <b>Extensions → Apps Script</b>, delete the sample code, and paste the script below.</li>
+        <li>Click <b>Deploy → New deployment</b>, gear icon → <b>Web app</b>.</li>
+        <li>Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b>, then <b>Deploy</b> and approve permissions (Advanced → Go to project if warned).</li>
+        <li>Copy the Web app URL (ends in <b>/exec</b>), paste it in the field above, tap <b>Save settings</b>, then <b>Test sync</b>.</li>
+      </ol>
+      <pre id="gsScript"></pre>
+      <div class="btns" style="margin-top:0"><button class="b primary" id="copyScript">Copy script</button></div>
+      <div class="status" id="copyStatus"></div>
+      <div class="warn">After editing the script later, use Deploy → Manage deployments → Edit → New version. This hosted page may block outside requests, so sync can fail here; host the file yourself (e.g. Netlify Drop) for live sync.</div>
+    </div>
+    <div class="hint">If configured, every check-in sends {date, time, habit, done, note} to your endpoint. The app still works offline and keeps localStorage as the local source of truth.</div>
+
+    <h3>Backup</h3>
+    <div class="btns">
+      <button class="b gold" id="dlBackup">Download JSON backup</button>
+      <button class="b" id="restoreBtn">Restore JSON backup</button>
+      <button class="b danger" id="resetAll">Reset all local data</button>
+    </div>
+    <input type="file" id="restoreFile" accept="application/json,.json" style="display:none">
+    <div class="status" id="backupStatus"></div>
+
+    <h3>Challenge configuration</h3>
+    <div class="row2">
+      <div><label class="f" for="cStart">Start date</label><input type="date" id="cStart"></div>
+      <div><label class="f" for="cEnd">End date</label><input type="date" id="cEnd"></div>
+    </div>
+    <label class="f" for="goals">Supporting goals (one per line)</label>
+    <textarea id="goals" style="min-height:190px"></textarea>
+    <div class="btns"><button class="b primary" id="saveConfig">Save configuration</button></div>
+    <div class="status" id="configStatus"></div>
+    <div class="hint">Prayer is the fixed anchor; habits are logged once per day. Dates and goals are editable — no documentation file was attached, so these are defaults from your original list.</div>
+  </section>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="onboard">
+  <div class="box">
+    <h1>Welcome to your Winter Arc</h1>
+    <p>Please enter your details to get started. Only your name is required, and everything stays on this device.</p>
+    <label class="f" for="oName">Name *</label>
+    <input type="text" id="oName" placeholder="Your name" autocomplete="name">
+    <div class="row2">
+      <div><label class="f" for="oAge">Age</label><input type="text" inputmode="numeric" id="oAge" placeholder="e.g. 24"></div>
+      <div><label class="f" for="oCity">City</label><input type="text" id="oCity" placeholder="e.g. Hyderabad"></div>
+    </div>
+    <div class="row2">
+      <div><label class="f" for="oHeight">Height (cm)</label><input type="text" inputmode="decimal" id="oHeight" placeholder="e.g. 172"></div>
+      <div><label class="f" for="oWeight">Weight (kg)</label><input type="text" inputmode="decimal" id="oWeight" placeholder="e.g. 78"></div>
+    </div>
+    <label class="f" for="oGoal">My main goal this winter</label>
+    <textarea id="oGoal" style="min-height:80px" placeholder="Why are you doing this arc?"></textarea>
+    <button class="b primary" id="oStart">Start my winter arc</button>
+    <div class="status" id="oStatus"></div>
+  </div>
+</div>
+<script>
+const GS_SCRIPT = `function doGet() {
+  return ContentService.createTextOutput('Winter Arc endpoint is live');
+}
+
+function doPost(e) {
+  if (!e || !e.postData) return ContentService.createTextOutput('no data (run via web app, not the Run button)');
+  var data = JSON.parse(e.postData.contents);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName('Log');
+  if (!sh) {
+    sh = ss.insertSheet('Log');
+    sh.appendRow(['Date', 'Time', 'Habit', 'Done', 'Note']);
+    sh.getRange('A:B').setNumberFormat('@');
+  }
+  var rows = sh.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === data.date && rows[i][2] === data.habit) {
+      sh.getRange(i + 1, 1, 1, 5).setValues([[data.date, data.time, data.habit, data.done, data.note || '']]);
+      return ContentService.createTextOutput('updated');
+    }
+  }
+  sh.appendRow([data.date, data.time, data.habit, data.done, data.note || '']);
+  return ContentService.createTextOutput('added');
+}`;
+const PRAYER = "5 prayers";
+const DEFAULTS = {
+  endpoint: "",
+  start: "2026-12-01",
+  end: "2027-02-28",
+  goals: ["Skills","Saving","Gym","Sleep","Side business","Content creation (fitness)","Clean food"]
+};
+const REMOVED = ["Consistency","Focus"];
+const HINTS = {
+  "5 prayers":"Which prayers were on time? Any missed, and why?",
+  "Skills":"Which skill are you building? What did you practice or learn today?",
+  "Saving":"How much did you save today? Where did it go (account / goal)?",
+  "Gym":"Workout type, main lifts, weights x reps, duration",
+  "Sleep":"Slept at / woke at, total hours, how rested do you feel?",
+  "Side business":"What did you work on? Leads, sales, money made, next step",
+  "Content creation (fitness)":"What did you film or post? Platform, idea, views/feedback",
+  "Clean food":"What did you eat? Any junk? Water intake?"
+};
+const hintFor = h => HINTS[h] || "Add details for this habit today";
+const K = {logs:"winter-arc-logs-v2", best:"winter-arc-best-streak-v2", notes:"winter-arc-notes-v1", hnotes:"winter-arc-habit-notes-v1", profile:"winter-arc-profile-v1", cfg:"winter-arc-settings-v1"};
+
+const pad = n => String(n).padStart(2,'0');
+const dateKey = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const timeNow = () => { const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); };
+const todayKey = () => dateKey(new Date());
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function load(key, fallback){ try{ const r=localStorage.getItem(key); if(r) return JSON.parse(r); }catch(e){} return fallback; }
+function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+let logs = load(K.logs, {});
+let notes = load(K.notes, {});
+let hnotes = load(K.hnotes, {});
+let profile = load(K.profile, {});
+let cfg = Object.assign({}, DEFAULTS, load(K.cfg, {}));
+cfg.goals = cfg.goals.filter(g=>!REMOVED.includes(g));
+let reportMonth = new Date(); reportMonth.setDate(1);
+const habits = () => [PRAYER].concat(cfg.goals);
+
+let toastTimer;
+function toast(msg, kind){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show'+(kind?' '+kind:'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ t.className=''; },2800);
+}
+document.getElementById('toast').addEventListener('click',()=>{ document.getElementById('toast').className=''; });
+function setStatus(id, msg, cls){
+  const el=document.getElementById(id); el.textContent=msg; el.className='status '+(cls||'');
+  if(msg && cls && id!=='noteStatus' && id!=='copyStatus' && id!=='oStatus') toast(msg, cls==='err'?'err':'');
+}
+
+async function sendSync(payload){
+  if(!cfg.endpoint) return {skipped:true};
+  try{
+    await fetch(cfg.endpoint, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(Object.assign({user:profile.name||''},payload))});
+    return {ok:true};
+  }catch(e){ return {ok:false, error:e}; }
+}
+
+function toggle(dateStr, habit){
+  if(!logs[dateStr]) logs[dateStr] = {};
+  let done, time;
+  if(logs[dateStr][habit]){
+    time = logs[dateStr][habit]; done = false;
+    delete logs[dateStr][habit];
+    if(!Object.keys(logs[dateStr]).length) delete logs[dateStr];
+  } else {
+    time = (dateStr===todayKey()) ? timeNow() : '—'; done = true;
+    logs[dateStr][habit] = time;
+  }
+  save(K.logs, logs);
+  renderAll();
+  toast(done ? '✓ '+habit+' logged at '+time : habit+' unmarked', done?'gold':'');
+  sendSync({date:dateStr, time, habit, done, note:(hnotes[dateStr]&&hnotes[dateStr][habit])||''}).then(r=>{
+    if(r.skipped) return;
+    setTimeout(()=>toast(r.ok?'Synced to your sheet':'Saved on this device. Sync failed.', r.ok?'':'err'), 900);
+  });
+}
+
+function weekDates(){
+  const now=new Date(), day=now.getDay(), off=(day===0)?-6:1-day;
+  const mon=new Date(now); mon.setDate(now.getDate()+off);
+  return Array.from({length:7},(_,i)=>{ const d=new Date(mon); d.setDate(mon.getDate()+i); return d; });
+}
+function currentStreak(){
+  let s=0, d=new Date();
+  while(logs[dateKey(d)] && logs[dateKey(d)][PRAYER]){ s++; d.setDate(d.getDate()-1); }
+  return s;
+}
+
+let hnTimer;
+function renderToday(){
+  const key=todayKey();
+  document.getElementById('todayHeading').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+  const wrap=document.getElementById('todayItems'); wrap.innerHTML='';
+  habits().forEach(h=>{
+    const on = logs[key] && logs[key][h];
+    const row=document.createElement('div'); row.className='item';
+    row.innerHTML=`<div class="irow"><div class="name ${h===PRAYER?'anchor':''}">${esc(h)}${on?`<span class="time">done at ${esc(on)}</span>`:''}</div><button class="tbtn ${on?'on':''}">${on?'✓':''}</button></div><textarea class="hn" placeholder="${esc(hintFor(h))}"></textarea>`;
+    row.querySelector('.tbtn').addEventListener('click',()=>toggle(key,h));
+    const ta=row.querySelector('textarea');
+    ta.value=(hnotes[key]&&hnotes[key][h])||'';
+    ta.addEventListener('input',()=>{
+      if(!hnotes[key]) hnotes[key]={};
+      if(ta.value) hnotes[key][h]=ta.value; else { delete hnotes[key][h]; if(!Object.keys(hnotes[key]).length) delete hnotes[key]; }
+      clearTimeout(hnTimer); hnTimer=setTimeout(()=>{ save(K.hnotes,hnotes); renderLog(); renderReport(); },400);
+    });
+    ta.addEventListener('change',()=>{ const t=logs[key]&&logs[key][h]; sendSync({date:key,time:t||'',habit:h,done:!!t,note:ta.value}); });
+    wrap.appendChild(row);
+  });
+  const box=document.getElementById('noteBox');
+  if(document.activeElement!==box) box.value = notes[key]||'';
+}
+
+function renderGrid(){
+  const week=weekDates(), grid=document.getElementById('grid');
+  grid.innerHTML=''; grid.appendChild(document.createElement('div'));
+  ["M","T","W","T","F","S","S"].forEach(l=>{ const e=document.createElement('div'); e.className='daylabel'; e.textContent=l; grid.appendChild(e); });
+  habits().forEach(h=>{
+    const rl=document.createElement('div'); rl.className='rowlabel'; rl.textContent=h; grid.appendChild(rl);
+    week.forEach(d=>{
+      const k=dateKey(d), on=logs[k]&&logs[k][h], c=document.createElement('div');
+      c.className='chk'+(on?' on':'')+(k===todayKey()?' today':'');
+      c.textContent=on?'✓':''; c.title=on?(k+' '+on):'';
+      c.addEventListener('click',()=>toggle(k,h)); grid.appendChild(c);
+    });
+  });
+}
+
+function renderStats(){
+  document.getElementById('stStreak').textContent=currentStreak();
+  let total=0; weekDates().forEach(d=>{ const k=dateKey(d); if(logs[k]) total+=Object.keys(logs[k]).length; });
+  document.getElementById('stWeekPct').textContent=Math.round(total/(habits().length*7)*100)+'%';
+  const s=new Date(cfg.start+'T00:00:00'), e=new Date(cfg.end+'T00:00:00'), now=new Date(); now.setHours(0,0,0,0);
+  const totalDays=Math.round((e-s)/864e5)+1, dayNum=Math.round((now-s)/864e5)+1;
+  const num=document.getElementById('stDay'), lbl=document.getElementById('stDayLbl');
+  if(isNaN(totalDays)){ num.textContent='–'; lbl.textContent='challenge day'; }
+  else if(dayNum<1){ num.textContent=Math.abs(dayNum-1); lbl.textContent='days to start'; }
+  else if(dayNum>totalDays){ num.textContent='Done'; lbl.textContent=totalDays+'-day arc'; }
+  else { num.textContent=dayNum+'/'+totalDays; lbl.textContent='challenge day'; }
+}
+
+function renderLog(){
+  const rows=[];
+  Array.from(new Set(Object.keys(logs).concat(Object.keys(hnotes)))).sort().reverse().forEach(d=>{
+    const hs=Array.from(new Set(Object.keys(logs[d]||{}).concat(Object.keys(hnotes[d]||{}))));
+    hs.forEach(h=>rows.push({d,h,t:(logs[d]&&logs[d][h])||'note only',n:(hnotes[d]&&hnotes[d][h])||''}));
+  });
+  document.getElementById('loglist').innerHTML = rows.length
+    ? rows.slice(0,80).map(r=>`<div class="logrow"><div><span>${esc(r.h)}</span>${r.n?`<span class="ln">${esc(r.n)}</span>`:''}</div><span class="ld">${r.d}</span><span class="lt">${esc(r.t)}</span></div>`).join('')
+    : '<div class="empty">No check-ins yet. Tap a habit on Today.</div>';
+  const nk=Object.keys(notes).filter(k=>notes[k]).sort().reverse();
+  document.getElementById('notelist').innerHTML = nk.length
+    ? nk.slice(0,30).map(k=>`<div class="notecard"><span class="nd">${k}</span>${esc(notes[k])}</div>`).join('')
+    : '<div class="empty">No notes yet.</div>';
+}
+
+const monthStr = d => d.getFullYear()+'-'+pad(d.getMonth()+1);
+function renderReport(){
+  document.getElementById('monthLabel').textContent=reportMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  const mk=monthStr(reportMonth), dim=new Date(reportMonth.getFullYear(),reportMonth.getMonth()+1,0).getDate();
+  const hs=habits(), counts={}; hs.forEach(h=>counts[h]=0); let any=false;
+  Object.keys(logs).forEach(d=>{ if(d.startsWith(mk)) Object.keys(logs[d]).forEach(h=>{ if(h in counts){counts[h]++; any=true;} }); });
+  Object.keys(notes).forEach(d=>{ if(d.startsWith(mk)&&notes[d]) any=true; });
+  Object.keys(hnotes).forEach(d=>{ if(d.startsWith(mk)) any=true; });
+  document.getElementById('reportBars').innerHTML=hs.map(h=>`<div class="barrow"><div class="top"><span>${esc(h)}</span><span class="pct">${counts[h]}/${dim}</span></div><div class="bartrack"><div class="barfill" style="width:${Math.round(counts[h]/dim*100)}%"></div></div></div>`).join('');
+  document.getElementById('exportBtn').disabled=!any;
+}
+
+function renderSettings(){
+  document.getElementById('endpoint').value=cfg.endpoint;
+  document.getElementById('cStart').value=cfg.start;
+  document.getElementById('cEnd').value=cfg.end;
+  document.getElementById('goals').value=cfg.goals.join('\n');
+}
+
+function renderHeader(){
+  const n=(profile.name||'').trim();
+  document.getElementById('subline').textContent = (n?('Assalamu alaykum, '+n+'. '):'')+'Prayer is the spine. Every check-in is timestamped.';
+}
+function renderProfile(){
+  ['Name','Age','City','Height','Weight','Goal'].forEach(f=>{ document.getElementById('p'+f).value=profile[f.toLowerCase()]||''; });
+}
+function renderAll(){ renderHeader(); renderToday(); renderGrid(); renderStats(); renderLog(); renderReport(); }
+
+async function saveFile(filename, data, mime){
+  try{
+    const dl = await claude.use("downloads");
+    if(dl){ await dl.save({filename, data}); return true; }
+  }catch(e){}
+  try{
+    const url=URL.createObjectURL(new Blob([data],{type:mime})), a=document.createElement('a');
+    a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); return true;
+  }catch(e){ return false; }
+}
+
+// Onboarding
+function checkOnboard(){ document.getElementById('onboard').classList.toggle('show', !(profile.name||'').trim()); }
+document.getElementById('oStart').addEventListener('click',()=>{
+  const name=document.getElementById('oName').value.trim();
+  if(!name){ setStatus('oStatus','Please enter your name to continue.','err'); return; }
+  profile={};
+  ['Name','Age','City','Height','Weight','Goal'].forEach(f=>{ const v=document.getElementById('o'+f).value.trim(); if(v) profile[f.toLowerCase()]=v; });
+  save(K.profile,profile); renderHeader(); renderProfile(); checkOnboard();
+});
+// Profile
+document.getElementById('saveProfile').addEventListener('click',()=>{
+  profile={};
+  ['Name','Age','City','Height','Weight','Goal'].forEach(f=>{ const v=document.getElementById('p'+f).value.trim(); if(v) profile[f.toLowerCase()]=v; });
+  save(K.profile,profile); renderHeader(); setStatus('profileStatus','Profile saved.','ok');
+});
+// Help
+document.getElementById('gsScript').textContent = GS_SCRIPT;
+document.getElementById('helpBtn').addEventListener('click',()=>{
+  const box=document.getElementById('helpBox'), open=box.classList.toggle('open');
+  document.getElementById('helpBtn').textContent = open ? 'Hide Google Sheets steps' : 'How to add Google Sheets';
+});
+document.getElementById('copyScript').addEventListener('click',async()=>{
+  let ok=false;
+  try{ await navigator.clipboard.writeText(GS_SCRIPT); ok=true; }catch(e){}
+  if(!ok){
+    try{
+      const r=document.createRange(); r.selectNodeContents(document.getElementById('gsScript'));
+      const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      ok=document.execCommand('copy');
+    }catch(e){}
+  }
+  setStatus('copyStatus', ok?'Script copied.':'Press and hold the script above to select and copy it.', ok?'ok':'err');
+});
+
+// Notes
+let noteTimer;
+document.getElementById('noteBox').addEventListener('input',e=>{
+  const k=todayKey(); notes[k]=e.target.value; if(!notes[k]) delete notes[k];
+  clearTimeout(noteTimer);
+  noteTimer=setTimeout(()=>{ save(K.notes,notes); setStatus('noteStatus','Saved','ok'); renderLog(); renderReport(); },400);
+});
+
+// Settings
+document.getElementById('saveSettings').addEventListener('click',()=>{
+  cfg.endpoint=document.getElementById('endpoint').value.trim();
+  save(K.cfg,cfg); setStatus('syncStatus','Settings saved.','ok');
+});
+document.getElementById('testSync').addEventListener('click',async()=>{
+  cfg.endpoint=document.getElementById('endpoint').value.trim(); save(K.cfg,cfg);
+  if(!cfg.endpoint){ setStatus('syncStatus','Add an endpoint URL first.','err'); return; }
+  setStatus('syncStatus','Sending test…');
+  const r=await sendSync({date:todayKey(), time:timeNow(), habit:'TEST', done:true});
+  if(r.ok) setStatus('syncStatus','Request sent. Check your sheet for a TEST row (browser can\'t read the reply).','ok');
+  else setStatus('syncStatus','Blocked or failed. This hosted page may not be allowed to call outside sites; try the file on your own hosting.','err');
+});
+document.getElementById('saveConfig').addEventListener('click',()=>{
+  const goals=document.getElementById('goals').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!goals.length){ setStatus('configStatus','Add at least one goal.','err'); return; }
+  cfg.start=document.getElementById('cStart').value||DEFAULTS.start;
+  cfg.end=document.getElementById('cEnd').value||DEFAULTS.end;
+  cfg.goals=goals; save(K.cfg,cfg); renderAll(); setStatus('configStatus','Configuration saved.','ok');
+});
+
+// Backup / restore / reset
+document.getElementById('dlBackup').addEventListener('click',async()=>{
+  const data=JSON.stringify({app:'winter-arc',version:1,exported:new Date().toISOString(),logs,notes,habitNotes:hnotes,profile,settings:cfg},null,2);
+  const ok=await saveFile('winter-arc-backup-'+todayKey()+'.json',data,'application/json');
+  setStatus('backupStatus',ok?'Backup ready.':'Could not create backup.',ok?'ok':'err');
+});
+document.getElementById('restoreBtn').addEventListener('click',()=>document.getElementById('restoreFile').click());
+document.getElementById('restoreFile').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const j=JSON.parse(rd.result);
+      if(!j || typeof j.logs!=='object') throw new Error('bad');
+      logs=j.logs||{}; notes=j.notes||{}; hnotes=j.habitNotes||{}; profile=j.profile||{}; save(K.profile,profile);
+      cfg=Object.assign({},DEFAULTS,j.settings||{}); cfg.goals=cfg.goals.filter(g=>!REMOVED.includes(g));
+      save(K.hnotes,hnotes); save(K.logs,logs); save(K.notes,notes); save(K.cfg,cfg);
+      renderAll(); renderSettings(); renderProfile(); checkOnboard(); setStatus('backupStatus','Backup restored.','ok');
+    }catch(err){ setStatus('backupStatus','That file is not a valid Winter Arc backup.','err'); }
+    e.target.value='';
+  };
+  rd.readAsText(f);
+});
+let resetArmed=false;
+document.getElementById('resetAll').addEventListener('click',e=>{
+  if(!resetArmed){ resetArmed=true; e.target.textContent='Tap again to erase everything'; setTimeout(()=>{resetArmed=false; e.target.textContent='Reset all local data';},4000); return; }
+  logs={}; notes={}; hnotes={}; profile={}; cfg=Object.assign({},DEFAULTS);
+  Object.values(K).forEach(k=>{ try{localStorage.removeItem(k);}catch(err){} });
+  resetArmed=false; e.target.textContent='Reset all local data';
+  renderAll(); renderSettings(); renderProfile(); checkOnboard(); setStatus('backupStatus','All local data erased.','ok');
+});
+
+// Report
+document.getElementById('prevMonth').addEventListener('click',()=>{ reportMonth.setMonth(reportMonth.getMonth()-1); renderReport(); });
+document.getElementById('nextMonth').addEventListener('click',()=>{ reportMonth.setMonth(reportMonth.getMonth()+1); renderReport(); });
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const mk=monthStr(reportMonth), rows=[["Date","Time","Habit","Note"]];
+  Array.from(new Set(Object.keys(logs).concat(Object.keys(hnotes)))).sort().forEach(d=>{
+    if(!d.startsWith(mk)) return;
+    Array.from(new Set(Object.keys(logs[d]||{}).concat(Object.keys(hnotes[d]||{})))).forEach(h=>rows.push([d,(logs[d]&&logs[d][h])||"",h,(hnotes[d]&&hnotes[d][h])||""]));
+  });
+  Object.keys(notes).sort().forEach(d=>{ if(d.startsWith(mk)&&notes[d]) rows.push([d,"","Daily note",notes[d]]); });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  saveFile('winter-arc-'+mk+'.csv',csv,'text/csv');
+});
+
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  b.classList.add('active'); document.getElementById('view-'+b.dataset.view).classList.add('active');
+}));
+
+renderAll(); renderSettings(); renderProfile(); checkOnboard();
+</script>
+</body>
+</html>
